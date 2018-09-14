@@ -45,10 +45,11 @@ def main(unused_argv):
     params=params)
 
   # Evaluate immediately
-  if args.eval:
-    print("Evaluating...")
-    eval_results = classifier.evaluate(input_fn=eval_input_fn)
-    print(eval_results)
+  print("Evaluating...")
+  eval_results = classifier.evaluate(input_fn=eval_input_fn)
+  print(eval_results)
+  if args.eval: # exit if flag set
+    return 0  
   
   # Evaluate for every new file
   for event in file_watch.event_gen(yield_nones=False):

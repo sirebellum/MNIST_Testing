@@ -12,7 +12,7 @@ def cnn(features, labels, mode):
       filters=16,
       kernel_size=[5, 5],
       strides=(1, 1),
-      padding="same",
+      padding="valid",
       activation=tf.nn.relu)
   
   # Pool Layer #1
@@ -24,7 +24,7 @@ def cnn(features, labels, mode):
       filters=32,
       kernel_size=[5, 5],
       strides=(1, 1),
-      padding="same",
+      padding="valid",
       activation=tf.nn.relu)
       
   # Pool Layer #2
