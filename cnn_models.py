@@ -47,6 +47,7 @@ def CNN_Model(features, labels, mode, params):
   _, height, width, depth = final.get_shape()
   print("CNN with final feature maps:", height, "x", width, "x", depth)
   print(height*width*depth, "total features")
+  
   # Dense layer
   final_flat = tf.reshape(final, [-1, height * width * depth])
   dense = tf.layers.dense(inputs=final_flat, units=1024, activation=tf.nn.relu)
@@ -64,8 +65,9 @@ def CNN_Model(features, labels, mode, params):
       "probabilities": tf.nn.softmax(logits, name="softmax_tensor")
   }
 
-  #Put images in tensorboard
+  # Put images in tensorboard
   if mode == tf.estimator.ModeKeys.TRAIN:
+      input_layer = tf.reshape(features, [-1, 28, 28, 1], name="image_input")
       tf.summary.image(
         "Image",
         input_layer,
@@ -98,8 +100,7 @@ def CNN_Model(features, labels, mode, params):
   return tf.estimator.EstimatorSpec(
       mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
       
-
-  
+      
 # Define the input function for training
 def train_function(x,
                y=None,
