@@ -4,7 +4,7 @@ import os
 import argparse
 import inotify.adapters
 import tensorflow as tf
-from cnn_models import CNN_Model, parse_record, eval_function
+from cnn_models import CNN_Model, eval_function
 cnn_model = CNN_Model #which model to use
 import mnist
 

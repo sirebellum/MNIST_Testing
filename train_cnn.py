@@ -3,7 +3,7 @@ import numpy as np
 import os
 import argparse
 import tensorflow as tf
-from cnn_models import CNN_Model, parse_record, train_function
+from cnn_models import CNN_Model, train_function
 cnn_model = CNN_Model #which model to use
 import mnist
 
