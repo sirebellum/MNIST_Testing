@@ -1,7 +1,6 @@
 import tensorflow as tf
-NUMCLASSES = 10
 
-def CNN_Model(features, labels, mode):
+def cnn(features, labels, mode):
   """Model function for CNN."""
   # Input Layer
   print("Mode:", mode)
@@ -33,11 +32,21 @@ def CNN_Model(features, labels, mode):
   
   # Final layer for conversion
   final = pool2
-      
-  # Dense Layer
+  
+  return final
+
+def CNN_Model(features, labels, mode):
+
+  # Remove duplicates and check how many distinct labels
+  NUMCLASSES = len( set(labels) )
+
+  final = cnn(features, labels, mode)
+
+  # Final feature map dimensions
   _, height, width, depth = final.get_shape()
   print("CNN with final feature maps:", height, "x", width, "x", depth)
   print(height*width*depth, "total features")
+  # Dense layer
   final_flat = tf.reshape(final, [-1, height * width * depth])
   dense = tf.layers.dense(inputs=final_flat, units=1024, activation=tf.nn.relu)
   dropout = tf.layers.dropout(
@@ -88,23 +97,7 @@ def CNN_Model(features, labels, mode):
   return tf.estimator.EstimatorSpec(
       mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
       
-      
-def parse_record(serialized_example): #parse a single binary example
-  """Parses a single tf.Example into image and label tensors."""
-  features = {'image/encoded': tf.FixedLenFeature([], tf.string),
-             'image/format':  tf.FixedLenFeature([], tf.string),
-             'image/label':   tf.FixedLenFeature([], tf.int64)}
-  features = tf.parse_single_example(serialized_example, features)
-  
-  #print("JPG:", features['image/encoded'])
-  image = tf.image.decode_jpeg(features['image/encoded'], channels=0)
-  #print("image:", image)
-  image = tf.reshape(image, [40, 398, 3])
-  image = tf.image.convert_image_dtype(image, tf.float32)
-  
-  label = tf.cast(features['image/label'], tf.int32)
-  
-  return (image, label)
+
   
 # Define the input function for training
 def train_function(x,
@@ -113,7 +106,7 @@ def train_function(x,
                num_epochs=None,
                shuffle=True,
                queue_capacity=1000,
-               num_threads=1):
+               num_threads=2):
 
     return tf.estimator.inputs.numpy_input_fn(x,
                                               y=y,
@@ -127,7 +120,7 @@ def train_function(x,
 def eval_function(x,
                   y=None,
                   batch_size=128,
-                  num_epochs=70,
+                  num_epochs=1,
                   shuffle=True,
                   queue_capacity=1000,
                   num_threads=1):
