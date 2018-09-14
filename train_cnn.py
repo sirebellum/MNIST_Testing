@@ -41,7 +41,7 @@ def main(unused_argv):
   # Train the model
   classifier.train(
         input_fn=train_input_fn,
-        steps=150000,
+        steps=25000,
         hooks=[logging_hook])
 
 if __name__ == "__main__":
