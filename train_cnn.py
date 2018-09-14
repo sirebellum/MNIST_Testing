@@ -15,7 +15,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("output_name", help="Specify model output name")
 parser.add_argument("--steps", default=5000, help="Train to number of steps")
 args = parser.parse_args()
-num_steps = args.steps
+num_steps = int(args.steps)
 
 CWD_PATH = os.getcwd()
 
