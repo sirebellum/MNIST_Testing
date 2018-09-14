@@ -30,8 +30,11 @@ def cnn(features, labels, mode):
   # Pool Layer #2
   pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=(1,1))
   
+  # Pool Layer #3
+  pool3 = tf.layers.max_pooling2d(inputs=pool2, pool_size=[2, 2], strides=(1,1))
+  
   # Final layer for conversion
-  final = pool2
+  final = pool3
   
   return final
 
@@ -50,7 +53,7 @@ def CNN_Model(features, labels, mode, params):
   
   # Dense layer
   final_flat = tf.reshape(final, [-1, height * width * depth])
-  dense = tf.layers.dense(inputs=final_flat, units=1024, activation=tf.nn.relu)
+  dense = tf.layers.dense(inputs=final_flat, units=256, activation=tf.nn.relu)
   dropout = tf.layers.dropout(
       inputs=dense, rate=0.3, training=mode == tf.estimator.ModeKeys.TRAIN)
 
