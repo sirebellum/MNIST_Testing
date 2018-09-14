@@ -19,6 +19,8 @@ def convert(imgf, labelf, outf, n):
     o.close()
     l.close()
 
+# Convert where CSV rows are label, pix-11, pix-12, pix-13, ...
+# where pix-ij is the pixel in the ith row and jth column.
 convert("train-images-idx3-ubyte", "train-labels-idx1-ubyte",
         "mnist_train.csv", 60000)
 convert("t10k-images-idx3-ubyte", "t10k-labels-idx1-ubyte",
