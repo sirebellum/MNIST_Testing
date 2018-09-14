@@ -35,11 +35,12 @@ def cnn(features, labels, mode):
   
   return final
 
-def CNN_Model(features, labels, mode):
+def CNN_Model(features, labels, mode, params):
 
   # Remove duplicates and check how many distinct labels
-  NUMCLASSES = len( set(labels) )
+  NUMCLASSES = params['num_labels']
 
+  # Pull final layer for classification
   final = cnn(features, labels, mode)
 
   # Final feature map dimensions

@@ -21,6 +21,10 @@ def main(unused_argv):
 
   # Set up 
   train_input_fn = train_function(mnist.train_images, y=mnist.train_labels)
+  
+  # Define params for model
+  params = {}
+  params['num_labels'] = len( set(mnist.train_labels) )
 
   # Estimator config to change frequency of ckpt files
   estimator_config = tf.estimator.RunConfig(
@@ -31,7 +35,8 @@ def main(unused_argv):
   classifier = tf.estimator.Estimator(
     model_fn=cnn_model,
     model_dir=CWD_PATH+"/models/"+args.output_name,
-    config=estimator_config )
+    config=estimator_config,
+    params=params)
     
   # Set up logging for predictions
   tensors_to_log = {"probabilities": "softmax_tensor"}

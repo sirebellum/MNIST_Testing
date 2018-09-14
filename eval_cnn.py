@@ -33,19 +33,25 @@ def main(unused_argv):
 
   # Get data
   eval_input_fn = eval_function(mnist.test_images, y=mnist.test_labels)
+  
+  # Define params for model
+  params = {}
+  params['num_labels'] = len( set(mnist.train_labels) )
 
   # Create the Estimator
   classifier = tf.estimator.Estimator(
     model_fn=cnn_model,
-    model_dir=model_path)
+    model_dir=model_path,
+    params=params)
 
+  # Evaluate immediately
   if args.eval:
     print("Evaluating...")
     eval_results = classifier.evaluate(input_fn=eval_input_fn)
     print(eval_results)
-    return 0
-    
-  for event in file_watch.event_gen(yield_nones=False): #Evaluate for every new file
+  
+  # Evaluate for every new file
+  for event in file_watch.event_gen(yield_nones=False):
     # Evaluate the model and print results
     (_, type_names, path, filename) = event
     new_ckpt = type_names[0] is 'IN_MOVED_TO' and 'checkpoint' in filename and 'tmp' not in filename
