@@ -13,7 +13,9 @@ tf.logging.set_verbosity(tf.logging.WARN)
 #Argument parsing
 parser = argparse.ArgumentParser()
 parser.add_argument("output_name", help="Specify model output name")
+parser.add_argument("--steps", default=5000, help="Train to number of steps")
 args = parser.parse_args()
+num_steps = args.steps
 
 CWD_PATH = os.getcwd()
 
@@ -46,7 +48,7 @@ def main(unused_argv):
   # Train the model
   classifier.train(
         input_fn=train_input_fn,
-        steps=25000,
+        steps=num_steps,
         hooks=[logging_hook])
 
 if __name__ == "__main__":
