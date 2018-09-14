@@ -10,7 +10,7 @@ def CNN_Model(features, labels, mode):
   # Convolutional Layer #1
   conv1 = tf.layers.conv2d(
       inputs=input_layer,
-      filters=32,
+      filters=16,
       kernel_size=[5, 5],
       strides=(1, 1),
       padding="same",
@@ -18,12 +18,27 @@ def CNN_Model(features, labels, mode):
   
   # Pool Layer #1
   pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=(1,1))
+  
+  # Convolutional Layer #2
+  conv2 = tf.layers.conv2d(
+      inputs=pool1,
+      filters=32,
+      kernel_size=[5, 5],
+      strides=(1, 1),
+      padding="same",
+      activation=tf.nn.relu)
+      
+  # Pool Layer #2
+  pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=(1,1))
+  
+  # Final layer for conversion
+  final = pool2
       
   # Dense Layer
-  _, height, width, depth = pool1.get_shape()
+  _, height, width, depth = final.get_shape()
   print("CNN with final feature maps:", height, "x", width, "x", depth)
   print(height*width*depth, "total features")
-  final_flat = tf.reshape(pool1, [-1, height * width * depth])
+  final_flat = tf.reshape(final, [-1, height * width * depth])
   dense = tf.layers.dense(inputs=final_flat, units=1024, activation=tf.nn.relu)
   dropout = tf.layers.dropout(
       inputs=dense, rate=0.3, training=mode == tf.estimator.ModeKeys.TRAIN)
