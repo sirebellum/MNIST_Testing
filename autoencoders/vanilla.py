@@ -25,7 +25,7 @@ def encode(features, labels, mode, params):
       tf.summary.image(
         "Image",
         reconstructed,
-        max_outputs=9
+        max_outputs=18
       )                
                 
   # Configure the Training Op (for TRAIN mode)
