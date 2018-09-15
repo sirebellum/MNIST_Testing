@@ -33,14 +33,13 @@ def encode(features, labels, mode, params):
     loss = tf.losses.mean_squared_error(labels=input_layer,
                                       predictions=reconstructed)
                                    
-    # Put images in tensorboard during eval
-    if mode == tf.estimator.ModeKeys.EVAL:
-      tf.summary.image(
+    # Put images in tensorboard
+    tf.summary.image(
         "Image",
         reconstructed,
         max_outputs=18
-      )                
-                
+      )
+    
     # Configure the Training Op (for TRAIN mode)
     if mode == tf.estimator.ModeKeys.TRAIN:
         optimizer = tf.train.AdamOptimizer(epsilon=0.01)
@@ -49,11 +48,14 @@ def encode(features, labels, mode, params):
                     global_step=tf.train.get_global_step())
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
         
+    
+    # EVAL stuff
     # Add evaluation metrics (for EVAL mode)
     eval_metric_ops = {
       "RMSE": tf.metrics.root_mean_squared_error(
           labels=input_layer, predictions=reconstructed)
     }
 
-    return tf.estimator.EstimatorSpec(
-        mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
+    return tf.estimator.EstimatorSpec(mode=mode,
+                                      loss=loss,
+                                      eval_metric_ops=eval_metric_ops)
