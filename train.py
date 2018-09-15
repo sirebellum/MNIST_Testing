@@ -7,10 +7,10 @@ from cnn_models import CNN_Model, train_function
 import mnist
 
 # Autoencoders
-from autoencoders import vanilla
+from autoencoders import conv, vanilla
 
 # which model to use
-cnn_model = vanilla.encode
+cnn_model = conv.encode
 
 tf.logging.set_verbosity(tf.logging.WARN)
 #DEBUG, INFO, WARN, ERROR, or FATAL
@@ -46,15 +46,14 @@ def main(unused_argv):
     params=params)
     
   # Set up logging for predictions
-  tensors_to_log = {"predictions": "image_output"}
-  logging_hook = tf.train.LoggingTensorHook(
-      tensors=tensors_to_log, every_n_iter=50)
+  #tensors_to_log = {"predictions": "image_output"}
+  #logging_hook = tf.train.LoggingTensorHook(
+  #    tensors=tensors_to_log, every_n_iter=50)
       
   # Train the model
   classifier.train(
         input_fn=train_input_fn,
-        steps=num_steps,
-        hooks=[logging_hook])
+        steps=num_steps)
 
 if __name__ == "__main__":
   tf.app.run()
