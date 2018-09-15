@@ -12,7 +12,7 @@ def encode(features, labels, mode, params):
     conv1_2 = tf.layers.Conv2D(8, (3, 3), activation='relu', padding='same')(pool1)
     pool2 = tf.layers.MaxPooling2D((2, 2), (2, 2), padding='same')(conv1_2)
     conv1_3 = tf.layers.Conv2D(8, (3, 3), activation='relu', padding='same')(pool2)
-    h = tf.layers.MaxPooling2D((2, 2), (2, 2), padding='same')(conv1_3)
+    h = tf.layers.MaxPooling2D((2, 2), (2, 2), padding='same', name='feature_map')(conv1_3)
 
     # Print dimensionality of lowest level
     _, height, width, depth = h.get_shape()
@@ -27,7 +27,8 @@ def encode(features, labels, mode, params):
     conv2_3 = tf.layers.Conv2D(16, (3, 3), activation='relu')(up2)
     up3 = tf.keras.layers.UpSampling2D((2, 2))(conv2_3)
     reconstructed = tf.layers.Conv2D(1, (3, 3), activation='sigmoid', padding='same', 
-                                     activity_regularizer=tf.nn.l2_loss)(up3)
+                                     activity_regularizer=tf.nn.l2_loss,
+                                     name='reconstructed_image')(up3)
 
     # Calculate Loss
     loss = tf.losses.mean_squared_error(labels=input_layer,
