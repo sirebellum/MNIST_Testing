@@ -43,6 +43,7 @@ def encode(features, labels, mode, params):
     
     # Configure the Training Op (for TRAIN mode)
     if mode == tf.estimator.ModeKeys.TRAIN:
+        # reducing e to 0.0001 midway through training increases accuracy
         optimizer = tf.train.AdamOptimizer(epsilon=0.01)
         train_op = optimizer.minimize(
                     loss=loss,
