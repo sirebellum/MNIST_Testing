@@ -51,7 +51,7 @@ def encode(features, labels, mode, params):
         
     # Add evaluation metrics (for EVAL mode)
     eval_metric_ops = {
-      "accuracy": tf.metrics.root_mean_squared_error(
+      "RMSE": tf.metrics.root_mean_squared_error(
           labels=input_layer, predictions=reconstructed)
     }
 
