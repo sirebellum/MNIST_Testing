@@ -14,6 +14,11 @@ def encode(features, labels, mode, params):
     conv1_3 = tf.layers.Conv2D(8, (3, 3), activation='relu', padding='same')(pool2)
     h = tf.layers.MaxPooling2D((2, 2), (2, 2), padding='same')(conv1_3)
 
+    # Print dimensionality of lowest level
+    _, height, width, depth = h.get_shape()
+    print("CNN with final feature maps:", height, "x", width, "x", depth)
+    print(height*width*depth, "total features")
+    
     # Decoder
     conv2_1 = tf.layers.Conv2D(8, (3, 3), activation='relu', padding='same')(h)
     up1 = tf.keras.layers.UpSampling2D((2, 2))(conv2_1)
