@@ -4,8 +4,13 @@ import os
 import argparse
 import tensorflow as tf
 from cnn_models import CNN_Model, train_function
-cnn_model = CNN_Model #which model to use
 import mnist
+
+# Autoencoders
+from autoencoders import vanilla
+
+# which model to use
+cnn_model = vanilla.encode
 
 tf.logging.set_verbosity(tf.logging.WARN)
 #DEBUG, INFO, WARN, ERROR, or FATAL
@@ -41,7 +46,7 @@ def main(unused_argv):
     params=params)
     
   # Set up logging for predictions
-  tensors_to_log = {"probabilities": "softmax_tensor"}
+  tensors_to_log = {"predictions": "image_output"}
   logging_hook = tf.train.LoggingTensorHook(
       tensors=tensors_to_log, every_n_iter=50)
       
