@@ -33,8 +33,8 @@ def encode(features, labels, mode, params):
     loss = tf.losses.mean_squared_error(labels=input_layer,
                                       predictions=reconstructed)
                                    
-    # Put images in tensorboard
-    if mode == tf.estimator.ModeKeys.TRAIN:
+    # Put images in tensorboard during eval
+    if mode == tf.estimator.ModeKeys.EVAL:
       tf.summary.image(
         "Image",
         reconstructed,
