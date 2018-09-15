@@ -5,8 +5,13 @@ import argparse
 import inotify.adapters
 import tensorflow as tf
 from cnn_models import CNN_Model, eval_function
-cnn_model = CNN_Model #which model to use
 import mnist
+
+# Autoencoders
+from autoencoders import conv, vanilla
+
+# Which model to use
+cnn_model = conv.encode
 
 #DEBUG, INFO, WARN, ERROR, or FATAL
 tf.logging.set_verbosity(tf.logging.WARN)

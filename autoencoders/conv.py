@@ -26,7 +26,8 @@ def encode(features, labels, mode, params):
     up2 = tf.keras.layers.UpSampling2D((2, 2))(conv2_2)
     conv2_3 = tf.layers.Conv2D(16, (3, 3), activation='relu')(up2)
     up3 = tf.keras.layers.UpSampling2D((2, 2))(conv2_3)
-    reconstructed = tf.layers.Conv2D(1, (3, 3), activation='sigmoid', padding='same')(up3)
+    reconstructed = tf.layers.Conv2D(1, (3, 3), activation='sigmoid', padding='same', 
+                                     activity_regularizer=tf.nn.l2_loss)(up3)
 
     # Calculate Loss
     loss = tf.losses.mean_squared_error(labels=input_layer,
@@ -47,3 +48,12 @@ def encode(features, labels, mode, params):
                     loss=loss,
                     global_step=tf.train.get_global_step())
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
+        
+    # Add evaluation metrics (for EVAL mode)
+    eval_metric_ops = {
+      "accuracy": tf.metrics.root_mean_squared_error(
+          labels=input_layer, predictions=reconstructed)
+    }
+
+    return tf.estimator.EstimatorSpec(
+        mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
