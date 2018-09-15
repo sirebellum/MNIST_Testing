@@ -54,7 +54,7 @@ def main(unused_argv):
   eval_results = classifier.evaluate(input_fn=eval_input_fn)
   print(eval_results)
   if args.eval: # exit if flag set
-    return 0  
+    exit() 
   
   # Evaluate for every new file
   for event in file_watch.event_gen(yield_nones=False):
