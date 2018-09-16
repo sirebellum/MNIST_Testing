@@ -21,9 +21,9 @@ with open('mnist_train.csv', newline='') as csvfile:
         
 # Convert to numpy arrays
 test_labels = np.asarray(test_labels, dtype=np.dtype('int32'))
-test_images = np.asarray(test_images, dtype=np.dtype('float16'))
+test_images = np.asarray(test_images, dtype=np.dtype('float32'))
 train_labels = np.asarray(train_labels, dtype=np.dtype('int32'))
-train_images = np.asarray(train_images, dtype=np.dtype('float16'))
+train_images = np.asarray(train_images, dtype=np.dtype('float32'))
 # Convert to float
 test_images = np.divide(test_images, 255)
 train_images = np.divide(train_images, 255)
