@@ -8,10 +8,10 @@ from cnn_models import CNN_Model, eval_function
 import mnist
 
 # Autoencoders
-from autoencoders import conv, vanilla
+from autoencoders import conv, vanilla, convnoise
 
 # Which model to use
-cnn_model = conv.encode
+cnn_model = convnoise.encode
 
 #DEBUG, INFO, WARN, ERROR, or FATAL
 tf.logging.set_verbosity(tf.logging.WARN)
