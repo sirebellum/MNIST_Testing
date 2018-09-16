@@ -11,7 +11,7 @@ import mnist
 from autoencoders import conv, vanilla, convnoise
 
 # Which model to use
-cnn_model = convnoise.encode
+cnn_model = conv.encode
 
 #DEBUG, INFO, WARN, ERROR, or FATAL
 tf.logging.set_verbosity(tf.logging.WARN)
