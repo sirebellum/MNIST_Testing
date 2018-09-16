@@ -4,7 +4,8 @@ import os
 import argparse
 import inotify.adapters
 import tensorflow as tf
-from functions import classifier, eval_function, get_weights
+from functions import eval_function, get_weights
+import models
 import mnist
 
 # Autoencoders
@@ -31,9 +32,9 @@ model_dir = directory+"/models/"+args.output_name
 # Get pretrained weights for feature extractor
 weights = None
 if args.weights is not None:
-    weights = os.path.join(os.path.dirname(__file__),'models', args.weights)
-    weights = get_weights(weights)
-
+    weights = os.path.join(os.path.dirname(__file__), args.weights)
+    weights = get_weights(weights) # numpy weights
+    
 #Inotify setup
 file_watch = inotify.adapters.Inotify()
 file_watch.add_watch(model_dir)
@@ -47,10 +48,11 @@ def main(unused_argv):
   params = {}
   params['num_labels'] = len( set(mnist.train_labels) )
   params['feature_extractor'] = feature_extractor
+  params['weights'] = weights
 
   # Create the Estimator
   classifier = tf.estimator.Estimator(
-    model_fn=conv.autoencoder,
+    model_fn=models.classifier,
     model_dir=model_dir,
     params=params)
 

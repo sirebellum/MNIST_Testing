@@ -3,7 +3,8 @@ import numpy as np
 import os
 import argparse
 import tensorflow as tf
-from functions import classifier, train_function, get_weights
+from functions import train_function, get_weights
+import models
 import mnist
 
 # Autoencoders
@@ -31,8 +32,8 @@ model_dir = directory+"/models/"+args.output_name
 # Get pretrained weights for feature extractor
 weights = None
 if args.weights is not None:
-    weights = os.path.join(os.path.dirname(__file__),'models', args.weights)
-    weights = get_weights(weights)
+    weights = os.path.join(os.path.dirname(__file__), args.weights)
+    weights = get_weights(weights) # numpy weights
 
 def main(unused_argv):
 
@@ -44,6 +45,7 @@ def main(unused_argv):
   params['num_labels'] = len( set(mnist.train_labels) )
   params['feature_extractor'] = feature_extractor
   params['noise'] = True
+  params['weights'] = weights
 
   # Estimator config to change frequency of ckpt files
   estimator_config = tf.estimator.RunConfig(
@@ -52,7 +54,7 @@ def main(unused_argv):
   
   # Create the Estimator
   classifier = tf.estimator.Estimator(
-    model_fn=conv.autoencoder,
+    model_fn=models.classifier,
     model_dir=model_dir,
     config=estimator_config,
     params=params)

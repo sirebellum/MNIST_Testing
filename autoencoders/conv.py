@@ -10,13 +10,29 @@ def gaussian_noise_layer(input_layer, std):
 
 def encode(features, weights):
 
+    # Initialization weights
+    if weights is not None:
+        biases = [ tf.constant_initializer(value) for value in weights['conv_biases'] ]
+        kernels = [ tf.constant_initializer(value) for value in weights['conv_kernels'] ]
+    else: # If no weights, set to doc defaults
+        biases = [tf.zeros_initializer()] * 3
+        kernels = [None] * 3
+        
     # Encoder
-    conv1_1 = tf.layers.Conv2D(16, (3, 3), activation='relu', padding='same', name='conv1-')(features)
+    conv1_1 = tf.layers.Conv2D(16, (3, 3), activation='relu', padding='same', name='conv1-', kernel_initializer=kernels[0], bias_initializer=biases[0])(features)
     pool1 = tf.layers.MaxPooling2D((2, 2), (2, 2), padding='same', name='pool2-')(conv1_1)
-    conv1_2 = tf.layers.Conv2D(8, (3, 3), activation='relu', padding='same', name='conv3-')(pool1)
+    
+    conv1_2 = tf.layers.Conv2D(8, (3, 3), activation='relu', padding='same', name='conv3-', kernel_initializer=kernels[1], bias_initializer=biases[1])(pool1)
     pool2 = tf.layers.MaxPooling2D((2, 2), (2, 2), padding='same', name='pool4-')(conv1_2)
-    conv1_3 = tf.layers.Conv2D(8, (3, 3), activation='relu', padding='same', name='conv5-')(pool2)
+    
+    conv1_3 = tf.layers.Conv2D(8, (3, 3), activation='relu', padding='same', name='conv5-', kernel_initializer=kernels[2], bias_initializer=biases[2])(pool2)
     h = tf.layers.MaxPooling2D((2, 2), (2, 2), padding='same', name='feature_map6-')(conv1_3)
+    
+    if weights is not None:
+        # Don't update layers
+        tf.stop_gradient(conv1_1)
+        tf.stop_gradient(conv1_2)
+        tf.stop_gradient(conv1_3)
     
     return h
     

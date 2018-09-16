@@ -1,115 +1,5 @@
 import tensorflow as tf
-
-def cnn(input_layer, weights):
-  """Model function for CNN."""
-  
-  # Convolutional Layer #1
-  conv1 = tf.layers.conv2d(
-      inputs=input_layer,
-      filters=16,
-      kernel_size=[5, 5],
-      strides=(1, 1),
-      padding="valid",
-      activation=tf.nn.relu)
-  
-  # Pool Layer #1
-  pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=(1,1))
-  
-  # Convolutional Layer #2
-  conv2 = tf.layers.conv2d(
-      inputs=pool1,
-      filters=32,
-      kernel_size=[5, 5],
-      strides=(1, 1),
-      padding="valid",
-      activation=tf.nn.relu)
-      
-  # Pool Layer #2
-  pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=(1,1))
-  
-  # Pool Layer #3
-  pool3 = tf.layers.max_pooling2d(inputs=pool2, pool_size=[2, 2], strides=(1,1))
-  
-  # Final layer for conversion
-  final = pool3
-  
-  return final
-
-def classifier(features, labels, mode, params):
-
-  # Input Layer
-  print("Mode:", mode)
-  input_layer = tf.reshape(features, [-1, 28, 28, 1], name="image_input")
-
-  # For classification purposes
-  NUMCLASSES = params['num_labels']
-
-  # Feature extractor (function)
-  extract = params['feature_extractor']
-  
-  # Pretrained weights
-  weights = params['weights']
-  
-  # Extract final layer for classification
-  feature_map = extract(input_layer, weights)
-
-  # Final feature map dimensions
-  _, height, width, depth = final.get_shape()
-  print("CNN with final feature maps:", height, "x", width, "x", depth)
-  print(height*width*depth, "total features")
-  
-  # Dense layer
-  final_flat = tf.reshape(final, [-1, height * width * depth])
-  dense = tf.layers.dense(inputs=final_flat, units=256, activation=tf.nn.relu)
-  dropout = tf.layers.dropout(
-      inputs=dense, rate=0.3, training=mode == tf.estimator.ModeKeys.TRAIN)
-
-  # Logits Layer
-  logits = tf.layers.dense(inputs=dropout, units=NUMCLASSES)
-
-  predictions = {
-      # Generate predictions (for PREDICT and EVAL mode)
-      "classes": tf.argmax(input=logits, axis=1),
-      # Add `softmax_tensor` to the graph. It is used for PREDICT and by the
-      # `logging_hook`
-      "probabilities": tf.nn.softmax(logits, name="softmax_tensor")
-  }
-
-  # Put images in tensorboard
-  if mode == tf.estimator.ModeKeys.TRAIN:
-      input_layer = tf.reshape(features, [-1, 28, 28, 1], name="image_input")
-      tf.summary.image(
-        "Image",
-        input_layer,
-        max_outputs=9
-      )
-  
-  if mode == tf.estimator.ModeKeys.PREDICT:
-    return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
-
-  # Calculate Loss (for both TRAIN and EVAL modes)
-  loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
-
-  # Configure the Training Op (for TRAIN mode)
-  if mode == tf.estimator.ModeKeys.TRAIN:
-    optimizer = tf.train.AdamOptimizer(epsilon=0.01)
-    train_op = optimizer.minimize(
-        loss=loss,
-        global_step=tf.train.get_global_step())
-    return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
-
-  # Add evaluation metrics (for EVAL mode)
-  eval_metric_ops = {
-      "accuracy": tf.metrics.accuracy(
-          labels=labels, predictions=predictions["classes"]),
-      "mean_accuracy": tf.metrics.mean_per_class_accuracy(
-          labels=labels, predictions=predictions["classes"],
-          num_classes=NUMCLASSES)
-  }
-
-  return tf.estimator.EstimatorSpec(
-      mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
-      
+import numpy as np
       
 # Define the input function for training
 def train_function(x,
@@ -148,11 +38,30 @@ def eval_function(x,
 # get weights from checkpoint at weights                        
 def get_weights(weights):
 
-    # Add ops to restore
+    # Read ckpt
+    checkpoint_path = weights
+    reader = tf.train.NewCheckpointReader(checkpoint_path)
+    var_to_shape_map = reader.get_variable_to_shape_map()
+
+    # Names of variables
+    variables = [key for key in var_to_shape_map]
+    # Only get important layers, marked with "-" at the ends
+    variables = [var for var in variables if "-" in var]
+    # Get actual layer names (instead of variable names)
+    variables = set([var.split("-")[0] for var in variables])
+    # Sort by sequence in model, first to last
+    from natsort import natsorted, ns
+    variables = natsorted(variables, key=lambda y: y.lower())
     
-    # need to rename layers to something parsable #
+    # Collect various weights for layers
+    conv_biases = [np.asarray( reader.get_tensor(key+"-/bias") ) \
+                                for key in variables]
+    conv_kernels = [np.asarray( reader.get_tensor(key+"-/kernel") ) \
+                                for key in variables]
     
-    with tf.Session() as sess:
-        # Restore variables from disk.
-        saver.restore(sess, weights)
-        print("Model restored.")
+    # Aggregate variables
+    variables = {}
+    variables['conv_biases'] = conv_biases
+    variables['conv_kernels'] = conv_kernels
+        
+    return variables
