@@ -5,18 +5,18 @@ NOIS_MEAN = 0.0
 NOISE_STD = 0.2
 
 def gaussian_noise_layer(input_layer, std):
-    noise = tf.random_normal(shape=tf.shape(input_layer), mean=0.0, stddev=std, dtype=tf.float32) 
+    noise = tf.random_normal(shape=tf.shape(input_layer), mean=NOIS_MEAN, stddev=std, dtype=tf.float32) 
     return input_layer + noise
 
 def encode(features, weights):
 
     # Encoder
-    conv1_1 = tf.layers.Conv2D(16, (3, 3), activation='relu', padding='same', name='conv1')(features)
-    pool1 = tf.layers.MaxPooling2D((2, 2), (2, 2), padding='same', name='pool2')(conv1_1)
-    conv1_2 = tf.layers.Conv2D(8, (3, 3), activation='relu', padding='same', name='conv3')(pool1)
-    pool2 = tf.layers.MaxPooling2D((2, 2), (2, 2), padding='same', name='pool4')(conv1_2)
-    conv1_3 = tf.layers.Conv2D(8, (3, 3), activation='relu', padding='same', name='conv5')(pool2)
-    h = tf.layers.MaxPooling2D((2, 2), (2, 2), padding='same', name='feature_map')(conv1_3)
+    conv1_1 = tf.layers.Conv2D(16, (3, 3), activation='relu', padding='same', name='conv1-')(features)
+    pool1 = tf.layers.MaxPooling2D((2, 2), (2, 2), padding='same', name='pool2-')(conv1_1)
+    conv1_2 = tf.layers.Conv2D(8, (3, 3), activation='relu', padding='same', name='conv3-')(pool1)
+    pool2 = tf.layers.MaxPooling2D((2, 2), (2, 2), padding='same', name='pool4-')(conv1_2)
+    conv1_3 = tf.layers.Conv2D(8, (3, 3), activation='relu', padding='same', name='conv5-')(pool2)
+    h = tf.layers.MaxPooling2D((2, 2), (2, 2), padding='same', name='feature_map6-')(conv1_3)
     
     return h
     
@@ -41,18 +41,19 @@ def autoencoder(features, labels, mode, params):
     
     # Input Layer
     input_layer = tf.reshape(features, [-1, HEIGHT, WIDTH, 1], name="image_input")
-    input = input_layer
     
     # Add noise
     noisy_layer = None
     if "noise" in params.keys():
         noisy_layer = gaussian_noise_layer(input_layer, NOISE_STD)
-        input = noisy_layer
-        
+    
     weights = None
     
     # Encode
-    feature_map = encode(input, weights)
+    if noisy_layer is not None:
+        feature_map = encode(noisy_layer, weights)
+    else: 
+        feature_map = encode(input_layer, weights)
     
     # Print dimensionality of feature map
     _, height, width, depth = feature_map.get_shape()
