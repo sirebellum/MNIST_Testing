@@ -3,14 +3,14 @@ import numpy as np
 import os
 import argparse
 import tensorflow as tf
-from cnn_models import CNN_Model, train_function
+from functions import classifier, train_function, get_weights
 import mnist
 
 # Autoencoders
-from autoencoders import conv, vanilla, convnoise
+from autoencoders import conv, vanilla
 
-# which model to use
-cnn_model = convnoise.encode
+# which encoder to use
+feature_extractor = conv.encode
 
 tf.logging.set_verbosity(tf.logging.WARN)
 #DEBUG, INFO, WARN, ERROR, or FATAL
@@ -19,10 +19,20 @@ tf.logging.set_verbosity(tf.logging.WARN)
 parser = argparse.ArgumentParser()
 parser.add_argument("output_name", help="Specify model output name")
 parser.add_argument("--steps", default=5000, help="Train to number of steps")
+parser.add_argument("--weights", default=None, help="Model checkpoint to get pretrained weights from")
 args = parser.parse_args()
 num_steps = int(args.steps)
 
-CWD_PATH = os.getcwd()
+# Directory setup
+abs_path = os.path.abspath(__file__) # Absolute path of this file
+directory = os.path.dirname(abs_path)
+model_dir = directory+"/models/"+args.output_name
+
+# Get pretrained weights for feature extractor
+weights = None
+if args.weights is not None:
+    weights = os.path.join(os.path.dirname(__file__),'models', args.weights)
+    weights = get_weights(weights)
 
 def main(unused_argv):
 
@@ -32,6 +42,8 @@ def main(unused_argv):
   # Define params for model
   params = {}
   params['num_labels'] = len( set(mnist.train_labels) )
+  params['feature_extractor'] = feature_extractor
+  params['noise'] = True
 
   # Estimator config to change frequency of ckpt files
   estimator_config = tf.estimator.RunConfig(
@@ -40,8 +52,8 @@ def main(unused_argv):
   
   # Create the Estimator
   classifier = tf.estimator.Estimator(
-    model_fn=cnn_model,
-    model_dir=CWD_PATH+"/models/"+args.output_name,
+    model_fn=conv.autoencoder,
+    model_dir=model_dir,
     config=estimator_config,
     params=params)
     

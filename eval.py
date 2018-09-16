@@ -4,14 +4,14 @@ import os
 import argparse
 import inotify.adapters
 import tensorflow as tf
-from cnn_models import CNN_Model, eval_function
+from functions import classifier, eval_function, get_weights
 import mnist
 
 # Autoencoders
-from autoencoders import conv, vanilla, convnoise
+from autoencoders import conv, vanilla
 
 # Which model to use
-cnn_model = conv.encode
+feature_extractor = conv.encode
 
 #DEBUG, INFO, WARN, ERROR, or FATAL
 tf.logging.set_verbosity(tf.logging.WARN)
@@ -20,19 +20,23 @@ tf.logging.set_verbosity(tf.logging.WARN)
 parser = argparse.ArgumentParser()
 parser.add_argument("output_name", help="Relative path to model")
 parser.add_argument("--eval", default=0, help="Evaluate only the most recent checkpoint if set")
+parser.add_argument("--weights", default=None, help="Model checkpoint to get pretrained weights from")
 args = parser.parse_args()
 
-#Allow either model name or directory to be used
-CWD_PATH = os.getcwd()
-if "models" and "/" not in args.output_name:
-  model_path = CWD_PATH+"/models/"+args.output_name
-else:
-  model_path = CWD_PATH+"/"+args.output_name
-print("Set to evaluate model at", model_path)
+# Directory setup
+abs_path = os.path.abspath(__file__) # Absolute path of this file
+directory = os.path.dirname(abs_path)
+model_dir = directory+"/models/"+args.output_name
+
+# Get pretrained weights for feature extractor
+weights = None
+if args.weights is not None:
+    weights = os.path.join(os.path.dirname(__file__),'models', args.weights)
+    weights = get_weights(weights)
 
 #Inotify setup
 file_watch = inotify.adapters.Inotify()
-file_watch.add_watch(model_path)
+file_watch.add_watch(model_dir)
 
 def main(unused_argv):
 
@@ -42,11 +46,12 @@ def main(unused_argv):
   # Define params for model
   params = {}
   params['num_labels'] = len( set(mnist.train_labels) )
+  params['feature_extractor'] = feature_extractor
 
   # Create the Estimator
   classifier = tf.estimator.Estimator(
-    model_fn=cnn_model,
-    model_dir=model_path,
+    model_fn=conv.autoencoder,
+    model_dir=model_dir,
     params=params)
 
   # Evaluate immediately

@@ -1,11 +1,8 @@
 import tensorflow as tf
 
-def cnn(features, labels, mode):
+def cnn(input_layer, weights):
   """Model function for CNN."""
-  # Input Layer
-  print("Mode:", mode)
-  input_layer = tf.reshape(features, [-1, 28, 28, 1], name="image_input")
-
+  
   # Convolutional Layer #1
   conv1 = tf.layers.conv2d(
       inputs=input_layer,
@@ -38,13 +35,23 @@ def cnn(features, labels, mode):
   
   return final
 
-def CNN_Model(features, labels, mode, params):
+def classifier(features, labels, mode, params):
 
-  # Remove duplicates and check how many distinct labels
+  # Input Layer
+  print("Mode:", mode)
+  input_layer = tf.reshape(features, [-1, 28, 28, 1], name="image_input")
+
+  # For classification purposes
   NUMCLASSES = params['num_labels']
 
-  # Pull final layer for classification
-  final = cnn(features, labels, mode)
+  # Feature extractor (function)
+  extract = params['feature_extractor']
+  
+  # Pretrained weights
+  weights = params['weights']
+  
+  # Extract final layer for classification
+  feature_map = extract(input_layer, weights)
 
   # Final feature map dimensions
   _, height, width, depth = final.get_shape()
@@ -137,3 +144,15 @@ def eval_function(x,
                                               shuffle=shuffle,
                                               queue_capacity=queue_capacity,
                                               num_threads=num_threads)
+                        
+# get weights from checkpoint at weights                        
+def get_weights(weights):
+
+    # Add ops to restore
+    
+    # need to rename layers to something parsable #
+    
+    with tf.Session() as sess:
+        # Restore variables from disk.
+        saver.restore(sess, weights)
+        print("Model restored.")
