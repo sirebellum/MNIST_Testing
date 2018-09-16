@@ -110,8 +110,8 @@ def train_function(x,
                batch_size=128,
                num_epochs=None,
                shuffle=True,
-               queue_capacity=1000,
-               num_threads=2):
+               queue_capacity=51200,
+               num_threads=6):
 
     return tf.estimator.inputs.numpy_input_fn(x,
                                               y=y,
