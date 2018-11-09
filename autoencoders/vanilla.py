@@ -1,16 +1,22 @@
 import tensorflow as tf
 HEIGHT = 28
 WIDTH = 28
+BETA = 0.0001
 
 def encode(features, weights):
   
   # Hidden Layers
   flattened = tf.reshape(features, [-1, HEIGHT*WIDTH])
-  hidden_layer1 = tf.layers.dense(inputs=flattened, units=256, activation=tf.nn.relu)
-  hidden_layer2 = tf.layers.dense(inputs=hidden_layer1, units=64, activation=tf.nn.relu)
-  hidden_layer3 = tf.layers.dense(inputs=hidden_layer2, units=32, activation=tf.nn.relu)
+  hidden_layer1 = tf.layers.dense(inputs=flattened,
+                                  units=256,
+                                  kernel_regularizer=tf.contrib.layers.l2_regularizer(BETA),
+                                  activation=tf.nn.relu)
+  hidden_layer2 = tf.layers.dense(inputs=hidden_layer1,
+                                  units=32,
+                                  kernel_regularizer=tf.contrib.layers.l2_regularizer(BETA),
+                                  activation=tf.nn.relu)
   
-  return hidden_layer3
+  return hidden_layer2
   
 def autoencode(features, labels, mode, params):
   

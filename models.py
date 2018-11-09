@@ -1,4 +1,7 @@
 import tensorflow as tf
+HEIGHT = 28
+WIDTH = 28
+BETA = 0.001
 
 def classifier(features, labels, mode, params):
 
@@ -19,17 +22,19 @@ def classifier(features, labels, mode, params):
   feature_map = extract(input_layer, weights)
 
   # Final feature map dimensions
-  _, height, width, depth = feature_map.get_shape()
-  print("CNN with final feature maps:", height, "x", width, "x", depth)
-  print(height*width*depth, "total features")
+  #_, height, width, depth = feature_map.get_shape()
+  #print("CNN with final feature maps:", height, "x", width, "x", depth)
+  #print(height*width*depth, "total features")
   
   # Dense layer
-  final_flat = tf.reshape(feature_map, [-1, height * width * depth])
+  #final_flat = tf.reshape(feature_map, [-1, HEIGHT*WIDTH])
   dropout = tf.layers.dropout(
-      inputs=final_flat, rate=0.3, training=mode == tf.estimator.ModeKeys.TRAIN)
+      inputs=feature_map, rate=0.3, training=mode == tf.estimator.ModeKeys.TRAIN)
 
   # Logits Layer
-  logits = tf.layers.dense(inputs=dropout, units=NUMCLASSES)
+  logits = tf.layers.dense(inputs=dropout,
+                           kernel_regularizer=tf.contrib.layers.l2_regularizer(BETA),
+                           units=NUMCLASSES)
 
   predictions = {
       # Generate predictions (for PREDICT and EVAL mode)
@@ -53,6 +58,9 @@ def classifier(features, labels, mode, params):
 
   # Calculate Loss (for both TRAIN and EVAL modes)
   loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
+  
+  # L2 Regularization for logits
+  loss += tf.reduce_mean(tf.losses.get_regularization_losses())
 
   # Configure the Training Op (for TRAIN mode)
   if mode == tf.estimator.ModeKeys.TRAIN:
