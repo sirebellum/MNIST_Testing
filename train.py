@@ -11,7 +11,7 @@ import mnist
 from autoencoders import conv, vanilla
 
 # which encoder to use
-feature_extractor = conv.encode
+feature_extractor = vanilla.encode
 
 tf.logging.set_verbosity(tf.logging.WARN)
 #DEBUG, INFO, WARN, ERROR, or FATAL

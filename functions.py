@@ -42,26 +42,28 @@ def get_weights(weights):
     checkpoint_path = weights
     reader = tf.train.NewCheckpointReader(checkpoint_path)
     var_to_shape_map = reader.get_variable_to_shape_map()
-
+    
     # Names of variables
     variables = [key for key in var_to_shape_map]
-    # Only get important layers, marked with "-" at the ends
-    variables = [var for var in variables if "-" in var]
+    # Only get important layers
+    variables = [var for var in variables if 'bias' in var or 'kernel' in var]
     # Get actual layer names (instead of variable names)
-    variables = set([var.split("-")[0] for var in variables])
-    # Sort by sequence in model, first to last
-    from natsort import natsorted, ns
-    variables = natsorted(variables, key=lambda y: y.lower())
+    variables = set([var.split("/")[0] for var in variables])
     
     # Collect various weights for layers
-    conv_biases = [np.asarray( reader.get_tensor(key+"-/bias") ) \
+    biases = [np.asarray( reader.get_tensor(key+"/bias") ) \
                                 for key in variables]
-    conv_kernels = [np.asarray( reader.get_tensor(key+"-/kernel") ) \
+    kernels = [np.asarray( reader.get_tensor(key+"/kernel") ) \
                                 for key in variables]
     
     # Aggregate variables
     variables = {}
-    variables['conv_biases'] = conv_biases
-    variables['conv_kernels'] = conv_kernels
+    variables['biases'] = biases
+    variables['kernels'] = kernels
         
     return variables
+    
+if __name__ == '__main__':
+
+    model_data = get_weights("models/classifier_L2+/model.ckpt-500000")
+    print(model_data)
