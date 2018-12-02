@@ -49,6 +49,9 @@ def get_weights(weights):
     variables = [var for var in variables if 'bias' in var or 'kernel' in var]
     # Get actual layer names (instead of variable names)
     variables = set([var.split("/")[0] for var in variables])
+    # Sort by sequence in model, first to last
+    from natsort import natsorted, ns
+    variables = natsorted(variables, key=lambda y: y.lower())
     
     # Collect various weights for layers
     biases = [np.asarray( reader.get_tensor(key+"/bias") ) \
@@ -65,5 +68,56 @@ def get_weights(weights):
     
 if __name__ == '__main__':
 
-    model_data = get_weights("models/classifier_L2+/model.ckpt-500000")
-    print(model_data)
+    saved_model = "models/final/model.ckpt-300000"
+    model_data = get_weights(saved_model)
+    
+    # Get max value in all layers
+    maxes = list()
+    for kernel in model_data['kernels']:
+        maxes.append(np.max(np.absolute(kernel)))
+    for bias in model_data['biases']:
+        maxes.append(np.max(np.absolute(bias)))
+    max_value = max(maxes)
+    
+    # Quantize
+    kernels = list()
+    for l in model_data['kernels']:
+    
+        # Each kernel in layer
+        kernel = list()
+        for output in l:
+        
+            # Each output in kernel
+            conn = list()
+            for val in output:
+                v = str(hex(int(val/max_value * 4096)))
+                conn.append( v )
+            kernel.append(conn)
+            
+        # Make neuron-wise
+        kernel = list(zip(*kernel))
+            
+        kernels.append(kernel)
+    
+    biases = list()
+    for l in model_data['biases']:
+    
+        # Each bias in layer
+        bias = list()
+        for val in l:
+        
+            v = str(hex(int(val/max_value * 4096)))
+            bias.append( v )
+            
+        biases.append(bias)
+    
+    with open("model.dat", "w") as f: 
+    
+        line = "{} "*(len(kernels[0][0])+2)
+        for x in range(0, len(kernels)):
+            
+            filler = [0]*(len(kernels[0][0])-len(kernels[x][0]))
+            
+            for n in range(0, len(kernels[x])):
+                f.write(line.format(x, *kernels[x][n], *filler, biases[x][n])+"\n")
+            
